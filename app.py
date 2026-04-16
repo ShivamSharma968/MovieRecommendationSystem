@@ -5,10 +5,9 @@ import pandas as pd
 # Load data
 movies = pd.read_csv('movies.csv')
 cosine_sim = pickle.load(open('cosine_sim.pkl', 'rb'))
-svd_model = pickle.load(open('svd_model.pkl', 'rb'))
 
-# Hybrid recommendation function
-def recommend(movie, user_id=1):
+# Content-based recommendation function
+def recommend(movie):
     idx = movies[movies['title'] == movie].index[0]
 
     # Content-based scores
@@ -16,17 +15,9 @@ def recommend(movie, user_id=1):
 
     scores = []
     for i, content_score in sim_scores:
-        movie_Id = movies.iloc[i]['movie_id']
+        scores.append((i, content_score))
 
-        # SVD predicted rating
-        svd_score = svd_model.predict(user_id, movie_Id).est / 5
-
-        # Hybrid score
-        final_score = 0.6 * content_score + 0.4 * svd_score
-
-        scores.append((i, final_score))
-
-    # Sort by hybrid score
+    # Sort by content similarity score
     scores = sorted(scores, key=lambda x: x[1], reverse=True)
 
     # Top 5 (skip itself)
